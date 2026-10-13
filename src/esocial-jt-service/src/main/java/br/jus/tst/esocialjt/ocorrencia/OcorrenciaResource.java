@@ -115,7 +115,7 @@ public class OcorrenciaResource {
 	@PostMapping(consumes = "application/json", produces = "application/json;charset=UTF-8")
 	public Ocorrencia receber(@RequestBody OcorrenciaDTO ocorrenciaDTO) {
 		Ocorrencia ocorrencia = OcorrenciaMapper.INSTANCE.comoOcorrencia(ocorrenciaDTO);
-		return ocorrenciaServico.salvar(ocorrencia);
+		return ocorrenciaServico.salvar(ocorrencia, ocorrenciaDTO.getCodEmpresa());
 	}
 	
 	@Operation(summary ="Lista URLs com exemplos disponíveis para como uma ocorrência deve ser enviada para o /esocial-jt-service/ocorrencias.")

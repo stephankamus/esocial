@@ -1,5 +1,6 @@
 EST_OCORRENCIA:
-  - COD_OCORRENCIA: "1" 
+  - COD_OCORRENCIA: "1" 
+    COD_EMPRESA: "1"
     TXT_TIPO_OCORRENCIA: "INFORMACOES_EMPREGADOR" 
     TXT_REFERENCIA: "1" 
     TXT_OPERACAO: "INCLUSAO" 
@@ -7,7 +8,8 @@ EST_OCORRENCIA:
     DTA_RECEBIMENTO: "2017-01-01 09:23:57" 
     TXT_DADOS_OCORRENCIA: "{\"tipo\":\".InformacoesEmpregador\",\"ideEmpregador\":{\"tpInsc\":1,\"nrInsc\":\"00509968000148\"},\"infoEmpregador\":{\"idePeriodo\":{\"iniValid\":\"2010-10\",\"fimValid\":null},\"infoCadastro\":{\"classTrib\":\"85\",\"indCoop\":\"0\",\"indConstr\":\"0\",\"indDesFolha\":\"0\",\"indOptRegEletron\":\"1\",\"dadosIsencao\":{\"ideMinLei\":\"Isen\u00E7\u00E3o Ministerio Lei\",\"nrCertif\":\"99999999\",\"dtEmisCertif\":1444014000000,\"dtVencCertif\":1581040800000,\"nrProtRenov\":\"464545\",\"dtProtRenov\":1299380400000,\"dtDou\":1325815200000,\"pagDou\":123}}}}" 
 
-  - COD_OCORRENCIA: "2" 
+  - COD_OCORRENCIA: "2" 
+    COD_EMPRESA: "1"
     TXT_TIPO_OCORRENCIA: "TABELA_LOTACAO" 
     TXT_REFERENCIA: "2" 
     TXT_OPERACAO: "INCLUSAO" 
@@ -15,7 +17,8 @@ EST_OCORRENCIA:
     DTA_RECEBIMENTO: "2017-01-01 09:25:56" 
     TXT_DADOS_OCORRENCIA: "{\"tipo\":\".TabelaLotacao\",\"ideEmpregador\":{\"tpInsc\":1,\"nrInsc\":\"00509968000148\"},\"infoLotacao\":{\"ideLotacao\":{\"codLotacao\":\"TST12345\",\"iniValid\":\"2017-01\",\"fimValid\":null},\"dadosLotacao\":{\"tpLotacao\":\"01\",\"tpInsc\":null,\"nrInsc\":null,\"fpasLotacao\":{\"fpas\":\"582\",\"codTercsSusp\":null,\"codTercs\":\"0000\",\"infoProcJudTerceiros\":null},\"infoEmprParcial\":{\"tpInscContrat\":0,\"nrInscContrat\":null,\"tpInscProp\":null,\"nrInscProp\":null}}}}" 
 
-  - COD_OCORRENCIA: "3" 
+  - COD_OCORRENCIA: "3" 
+    COD_EMPRESA: "1"
     TXT_TIPO_OCORRENCIA: "ADMISSAO_TRABALHADOR" 
     TXT_REFERENCIA: "3" 
     TXT_OPERACAO: "INCLUSAO" 
@@ -23,7 +26,8 @@ EST_OCORRENCIA:
     DTA_RECEBIMENTO: "2017-01-01 09:25:57" 
     TXT_DADOS_OCORRENCIA: "{\"tipo\":\".Admissao\",\"ideEmpregador\":{\"tpInsc\":1,\"nrInsc\":\"00509968000148\"},\"trabalhador\":{\"cpfTrab\":\"03586629150\",\"nmTrab\":\"LEIA ORGANA SOLO\",\"sexo\":\"F\",\"racaCor\":3,\"estCiv\":1,\"grauInstr\":\"11\",\"nascimento\":{\"dtNascto\":629085600000,\"paisNascto\":\"105\",\"paisNac\":\"105\"},\"endereco\":{\"brasil\":{\"tpLograd\":\"IND\",\"dscLograd\":\"TRIBUNAL SUPERIOR DO TRABALHO (TST)\",\"nrLograd\":\"1\",\"complemento\":\"SAFS QUADRA 8 LOTE 1\",\"bairro\":\"ZONA CIVICO-ADMINISTRATIVA\",\"cep\":\"70070943\",\"codMunic\":5300108,\"uf\":\"DF\"}},\"infoDeficiencia\":{\"defFisica\":\"N\",\"defVisual\":\"N\",\"defAuditiva\":\"N\",\"defMental\":\"N\",\"defIntelectual\":\"N\",\"reabReadap\":\"N\",\"infoCota\":\"N\"},\"dependente\":[],\"contato\":{\"fonePrinc\":\"6130430001\",\"emailPrinc\":\"ra.fasantiago@hotmail.com\"}},\"vinculo\":{\"matricula\":\"C058520-001\",\"tpRegTrab\":2,\"tpRegPrev\":2,\"cadIni\":\"S\",\"infoRegimeTrab\":{\"infoEstatutario\":{\"tpProv\":1,\"dtExercicio\":535341600000,\"tpPlanRP\":1}},\"infoContrato\":{\"codCateg\":302,\"remuneracao\":{\"undSalFixo\":5,\"dscSalVar\":\"Soma do vencimento com a GAJ (Gratificacao de Atividade Judiciaria)\"},\"duracao\":{\"tpContr\":1},\"localTrabalho\":{\"localTrabGeral\":{\"tpInsc\":1,\"nrInsc\":\"00509968000148\"}}}}}" 
 
-  - COD_OCORRENCIA: "4" 
+  - COD_OCORRENCIA: "4" 
+    COD_EMPRESA: "1"
     TXT_TIPO_OCORRENCIA: "TABELA_LOTACAO" 
     TXT_REFERENCIA: "2" 
     TXT_OPERACAO: "INCLUSAO" 

@@ -15,6 +15,7 @@ public abstract class OcorrenciaMapper {
 	@Mapping(target = "dataRecebimento", ignore = true)
 	@Mapping(target = "evento", ignore = true)
 	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "empresa", ignore = true)
 	public abstract Ocorrencia comoOcorrencia(OcorrenciaDTO ocorrenciaDTO);
 
 }

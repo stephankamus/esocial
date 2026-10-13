@@ -2,7 +2,7 @@ package br.jus.tst.esocialjt.certificado;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class Certificado {
 
 	private String pathArquivoCertificado;
+	private byte[] conteudoCertificado;
 	private String pathArquivoCacerts;
 	private String tipoCertificado;
 	private char[] senhaCertificado;
@@ -53,6 +54,15 @@ public class Certificado {
 		this.senhaCacerts = senhaCacerts;
 		this.tipoCertificado = trim(tipoCertificado);
 		this.alias = trim(alias);
+	}
+
+	/** Certificado multiempresa: keystore em memória (vindo do banco) em vez de arquivo. */
+	public static Certificado deBytes(byte[] conteudo, String pathArquivoCacerts, char[] senhaCertificado,
+			char[] senhaCacerts, String tipoCertificado, String alias) {
+		Certificado c = new Certificado(null, pathArquivoCacerts, senhaCertificado, senhaCacerts, tipoCertificado,
+				alias);
+		c.conteudoCertificado = conteudo;
+		return c;
 	}
 
 	public KeyManager[] getKeyManagers() {
@@ -125,13 +135,14 @@ public class Certificado {
 	}
 
 	public boolean existeConfiguracaoCertificado() {
-		return StringUtils.isNotBlank(pathArquivoCertificado);
+		return conteudoCertificado != null || StringUtils.isNotBlank(pathArquivoCertificado);
 	}
 
 	private KeyStore getKeyStore() {
 		if (keyStore == null) {
-			File fileCertificado = new File(getPathArquivoCertificado());
-			try (FileInputStream keyStoreStream = new FileInputStream(fileCertificado)) {
+			try (InputStream keyStoreStream = conteudoCertificado != null
+					? new ByteArrayInputStream(conteudoCertificado)
+					: new FileInputStream(getPathArquivoCertificado())) {
 				keyStore = KeyStore.getInstance(tipoCertificado);
 				keyStore.load(keyStoreStream, getSenhaCertificado());
 			} catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {

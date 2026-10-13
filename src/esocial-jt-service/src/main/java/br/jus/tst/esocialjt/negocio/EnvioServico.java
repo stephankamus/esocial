@@ -79,7 +79,7 @@ public class EnvioServico {
 			try {
 				String xmlLote = geradorLote.gerarXmlLote(lote);
 				lote.setXmlLote(xmlLote);
-				RetornoEnvio retorno = comunicacaoEsocialGov.enviarLoteEventos(xmlLote);
+				RetornoEnvio retorno = comunicacaoEsocialGov.enviarLoteEventos(xmlLote, lote.getEmpresa().getId());
 				preencherDadosEnvioLote(lote, retorno);		
 			} catch (GeracaoXmlException | ComunicacaoEsocialGovException e) {
 				lote.setErroInterno(e.getMessage());

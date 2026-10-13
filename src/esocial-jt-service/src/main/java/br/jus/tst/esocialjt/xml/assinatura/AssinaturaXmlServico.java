@@ -48,6 +48,10 @@ public class AssinaturaXmlServico {
 	private final String digestMethod = "http://www.w3.org/2001/04/xmlenc#sha256";
 
 	public String assinar(String xml) {
+		return assinar(xml, certificado);
+	}
+
+	public String assinar(String xml, Certificado certificado) {
 		String signedXML = null;
 		try {
 			Init.init();

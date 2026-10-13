@@ -3,6 +3,7 @@ package br.jus.tst.esocialjt.dominio;
 import br.jus.tst.esocial.ocorrencia.Operacao;
 import br.jus.tst.esocial.ocorrencia.TipoOcorrencia;
 import br.jus.tst.esocial.ocorrencia.dados.DadosOcorrencia;
+import br.jus.tst.esocialjt.empresa.Empresa;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -92,6 +93,19 @@ public class Ocorrencia implements Serializable {
 
 	@Column(name = "COD_OCORRENCIA_RETIFICACAO")
 	private Long ocorrenciaRetificacaoId;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "COD_EMPRESA", nullable = false)
+	private Empresa empresa;
+
+	public Empresa getEmpresa() {
+		return empresa;
+	}
+
+	public Ocorrencia setEmpresa(Empresa empresa) {
+		this.empresa = empresa;
+		return this;
+	}
 
 	public Long getId() {
 		return id;

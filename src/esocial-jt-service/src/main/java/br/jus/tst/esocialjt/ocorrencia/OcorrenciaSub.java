@@ -37,7 +37,7 @@ public class OcorrenciaSub {
 		try {
 			OcorrenciaDTO ocorrenciaDTO = deserializer.converter(mensagem);
 			Ocorrencia ocorrencia = OcorrenciaMapper.INSTANCE.comoOcorrencia(ocorrenciaDTO);
-			Ocorrencia ocorrenciaSalva = servico.salvar(ocorrencia);
+			Ocorrencia ocorrenciaSalva = servico.salvar(ocorrencia, ocorrenciaDTO.getCodEmpresa());
 			ocorrenciaRespPub.send(200, false, ocorrenciaSalva);
 		} catch (Exception e) {
 			LOGGER.error("Erro ao ler tópico: \n"

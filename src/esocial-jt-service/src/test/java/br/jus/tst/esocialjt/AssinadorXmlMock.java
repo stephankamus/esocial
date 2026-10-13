@@ -13,6 +13,11 @@ public class AssinadorXmlMock extends AssinadorXml {
 	public String assinar(String xml) {
 		return xml.replace("</eSocial>", snippetAssinatura() + "</eSocial>");
 	}
+
+	@Override
+	public String assinar(String xml, Long codEmpresa) {
+		return assinar(xml);
+	}
 	
 	private String snippetAssinatura() {
 		return 

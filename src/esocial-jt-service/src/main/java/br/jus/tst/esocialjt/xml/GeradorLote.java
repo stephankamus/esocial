@@ -27,6 +27,7 @@ import br.jus.tst.esocialjt.dominio.EnvioEvento;
 import br.jus.tst.esocialjt.dominio.Evento;
 import br.jus.tst.esocialjt.dominio.GrupoTipoEvento;
 import br.jus.tst.esocialjt.dominio.Lote;
+import br.jus.tst.esocialjt.empresa.Empresa;
 import br.jus.tst.esocialjt.negocio.exception.GeracaoXmlException;
 
 @Component
@@ -56,10 +57,15 @@ public class GeradorLote {
 				.map(EnvioEvento::getXmlEvento)
 				.collect(Collectors.toList());
 		
-		return gerarLote(xmls, grupo, cnpj);
+		return gerarLote(xmls, grupo, cnpj, lote.getEmpresa());
 	}
 
 	public String gerarLote(Collection<String> xmlsEventos, GrupoTipoEvento grupo, String cnpj)
+			throws GeracaoXmlException {
+		return gerarLote(xmlsEventos, grupo, cnpj, null);
+	}
+
+	private String gerarLote(Collection<String> xmlsEventos, GrupoTipoEvento grupo, String cnpj, Empresa empresa)
 			throws GeracaoXmlException {
 		if (!this.validarLimitesGeracaolote(xmlsEventos)) {
 			throw new GeracaoXmlException(
@@ -71,7 +77,7 @@ public class GeradorLote {
 			ESocial.EnvioLoteEventos envioLoteEventos = new ESocial.EnvioLoteEventos();
 			envioLoteEventos.setGrupo(grupo.getId().intValue());
 			envioLoteEventos.setIdeEmpregador(gerarEmpregador(cnpj));
-			envioLoteEventos.setIdeTransmissor(gerarTransmissor(cnpj));
+			envioLoteEventos.setIdeTransmissor(gerarTransmissor(cnpj, empresa));
 			envioLoteEventos.setEventos(getEventosArquivoEsocial(xmlsEventos));
 			eSocial.setEnvioLoteEventos(envioLoteEventos);
 			return marshal(eSocial);
@@ -93,11 +99,17 @@ public class GeradorLote {
 		return empregador;
 	}
 
-	private TIdeTransmissor gerarTransmissor(String cnpj) {
+	/** Com empresa: transmissor dela (ou ela mesma); sem empresa, mantém as propriedades globais legadas. */
+	private TIdeTransmissor gerarTransmissor(String cnpj, Empresa empresa) {
 
 		TIdeTransmissor transmissor = new TIdeTransmissor();
 
-		if (!"0".equals(tpInscIdeTransmissor.trim()) && !"0".equals(nrInscIdeTransmissor.trim())) {
+		if (empresa != null) {
+			boolean temTransmissor = empresa.getTpInscTransmissor() != null
+					&& empresa.getNrInscTransmissor() != null && !empresa.getNrInscTransmissor().trim().isEmpty();
+			transmissor.setNrInsc(temTransmissor ? empresa.getNrInscTransmissor().trim() : empresa.getCnpj());
+			transmissor.setTpInsc(temTransmissor ? empresa.getTpInscTransmissor().byteValue() : (byte) empresa.getTpInsc());
+		} else if (!"0".equals(tpInscIdeTransmissor.trim()) && !"0".equals(nrInscIdeTransmissor.trim())) {
 			transmissor.setNrInsc(nrInscIdeTransmissor.trim());
 			transmissor.setTpInsc((byte) Integer.parseInt(tpInscIdeTransmissor.trim()));
 		} else {

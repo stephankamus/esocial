@@ -5,6 +5,7 @@ import br.jus.tst.esocial.ret.beneficiario.Beneficiario;
 import br.jus.tst.esocial.ret.empregado.Empregado;
 import br.jus.tst.esocial.ret.tsv.TrabalhadorSemVinculo;
 import br.jus.tst.esocialjt.dominio.Ocorrencia;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 import br.jus.tst.esocialjt.ocorrencia.OcorrenciaDTODeserializer;
 import br.jus.tst.esocialjt.ocorrencia.OcorrenciaMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ public class OcorrenciaUtil {
 			InputStream ocorrenciaStr = Resource.asStream(arquivo);
 			OcorrenciaDTO ocorrenciaDTO = deserializer.converter(ocorrenciaStr);
 			Ocorrencia ocorrencia = OcorrenciaMapper.INSTANCE.comoOcorrencia(ocorrenciaDTO);
+			ocorrencia.setEmpresa(EmpresaTeste.empresa());
 			ocorrencia.setCpf(ocorrencia.getDadosOcorrencia().getCpf());
 			ocorrencia.setMatricula(ocorrencia.getDadosOcorrencia().getMatricula());
 			ocorrencia.setPeriodoApuracao(ocorrencia.getDadosOcorrencia().getPeriodoApuracao());

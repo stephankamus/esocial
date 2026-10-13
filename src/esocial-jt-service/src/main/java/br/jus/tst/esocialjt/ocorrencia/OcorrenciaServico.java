@@ -1,6 +1,11 @@
 package br.jus.tst.esocialjt.ocorrencia;
 
 import br.jus.tst.esocial.ocorrencia.dados.DadosOcorrencia;
+import br.jus.tst.esocial.dominio.empregador.IdeEmpregador;
+import br.jus.tst.esocialjt.empresa.Empresa;
+import br.jus.tst.esocialjt.empresa.EmpresaException;
+import br.jus.tst.esocialjt.empresa.EmpresaServico;
+import org.springframework.http.HttpStatus;
 import br.jus.tst.esocial.ocorrencia.dados.Exclusao;
 import br.jus.tst.esocialjt.dominio.Estado;
 import br.jus.tst.esocialjt.dominio.Evento;
@@ -54,10 +59,23 @@ public class OcorrenciaServico {
 	@Autowired
 	ExclusaoServico exclusaoServico;
 
+	@Autowired
+	EmpresaServico empresaServico;
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(OcorrenciaServico.class);
 
 	@Transactional
+	public Ocorrencia salvar(Ocorrencia ocorrencia, Long codEmpresa) {
+		if (codEmpresa == null) {
+			throw new EmpresaException(HttpStatus.BAD_REQUEST, "codEmpresa é obrigatório");
+		}
+		ocorrencia.setEmpresa(empresaServico.obterAtiva(codEmpresa));
+		return salvar(ocorrencia);
+	}
+
+	@Transactional
 	public Ocorrencia salvar(Ocorrencia ocorrencia) {
+		conferirEmpregador(ocorrencia);
 		ocorrencia.setDataRecebimento(
 				new Date(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 		ocorrencia.setCpf(ocorrencia.getDadosOcorrencia().getCpf());
@@ -65,6 +83,20 @@ public class OcorrenciaServico {
 		ocorrencia.setPeriodoApuracao(ocorrencia.getDadosOcorrencia().getPeriodoApuracao());
 
 		return gerarEvento(ocorrencia);
+	}
+
+	/** ideEmpregador.nrInsc deve ser o CNPJ da empresa ou sua raiz (8 dígitos). */
+	private void conferirEmpregador(Ocorrencia ocorrencia) {
+		Empresa empresa = ocorrencia.getEmpresa();
+		if (empresa == null) {
+			throw new EmpresaException(HttpStatus.BAD_REQUEST, "codEmpresa é obrigatório");
+		}
+		IdeEmpregador ide = ocorrencia.getDadosOcorrencia().getIdeEmpregador();
+		String nrInsc = ide == null ? null : ide.getNrInsc();
+		if (nrInsc == null || !(nrInsc.equals(empresa.getCnpj()) || nrInsc.equals(empresa.getCnpj().substring(0, 8)))) {
+			throw new EmpresaException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"ideEmpregador.nrInsc (" + nrInsc + ") não corresponde ao CNPJ da empresa " + empresa.getId());
+		}
 	}
 
 	public List<Ocorrencia> recuperaTodos() {

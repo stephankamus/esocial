@@ -83,7 +83,7 @@ public class AtualizacaoProcessamentoServico {
 
 		lotes.forEach(lote -> {
 			try {
-				RetornoProcessamento retornoProcessamento = comunicacaoEsocialGov.consultarLoteEventos(lote.getProtocolo());
+				RetornoProcessamento retornoProcessamento = comunicacaoEsocialGov.consultarLoteEventos(lote.getProtocolo(), lote.getEmpresa().getId());
 				RetornoLote retornoLote = retornoProcessamento.getRetornoLote();
 
 				preencherDadosProcessamentoLote(lote, retornoLote);

@@ -21,6 +21,18 @@ public class OcorrenciaDTO {
 
 	private DadosOcorrencia dadosOcorrencia;
 
+	/** ID da empresa (EST_EMPRESA) dona da ocorrência; obrigatório no envio. */
+	private Long codEmpresa;
+
+	public Long getCodEmpresa() {
+		return codEmpresa;
+	}
+
+	public OcorrenciaDTO setCodEmpresa(Long codEmpresa) {
+		this.codEmpresa = codEmpresa;
+		return this;
+	}
+
 	public TipoOcorrencia getTipoOcorrencia() {
 		return tipoOcorrencia;
 	}

@@ -13,6 +13,10 @@ import org.springframework.oxm.XmlMappingException;
 import org.springframework.stereotype.Component;
 import org.springframework.ws.soap.client.SoapFaultClientException;
 
+import br.jus.tst.esocialjt.empresa.ComunicacaoRegistry;
+import br.jus.tst.esocialjt.empresa.EmpresaDTO;
+import br.jus.tst.esocialjt.empresa.EmpresaException;
+import br.jus.tst.esocialjt.empresa.EmpresaServico;
 import br.jus.tst.esocialjt.infraestrutura.Http;
 import br.jus.tst.esocialjt.negocio.exception.ComunicacaoEsocialGovException;
 
@@ -30,26 +34,79 @@ public class ComunicacaoEsocialGov {
 	@Autowired
 	ComunicacaoServico servico;
 
+	@Autowired
+	ComunicacaoRegistry comunicacaoRegistry;
+
+	@Autowired
+	EmpresaServico empresaServico;
+
+	public RetornoEnvio enviarLoteEventos(String lote, Long codEmpresa) throws ComunicacaoEsocialGovException {
+		return enviar(lote, servicoDaEmpresa(codEmpresa));
+	}
+
+	public RetornoProcessamento consultarLoteEventos(String protocolo, Long codEmpresa)
+			throws ComunicacaoEsocialGovException {
+		return consultar(protocolo, servicoDaEmpresa(codEmpresa));
+	}
+
+	private ComunicacaoServico servicoDaEmpresa(Long codEmpresa) throws ComunicacaoEsocialGovException {
+		try {
+			return comunicacaoRegistry.obter(codEmpresa);
+		} catch (EmpresaException e) {
+			throw new ComunicacaoEsocialGovException("Empresa " + codEmpresa + ": " + e.getMessage(), e);
+		}
+	}
+
 	public RetornoEnvio enviarLoteEventos(String lote) throws ComunicacaoEsocialGovException {
+		return enviar(lote, servico);
+	}
+
+	private RetornoEnvio enviar(String lote, ComunicacaoServico servico) throws ComunicacaoEsocialGovException {
 		String xmlRetorno = isNotBlank(urlServicoEnvioLote) ? 
 								servicoEnvioRemoto(lote) : 
-								servicoEnvioLocal(lote);
+								servicoEnvioLocal(lote, servico);
 		RetornoEnvio retornoEnvio = new RetornoEnvio(xmlRetorno);
 		verificarProtocolo(xmlRetorno, retornoEnvio);
 		return retornoEnvio;
 	}
 	
 	public RetornoProcessamento consultarLoteEventos(String protocolo) throws ComunicacaoEsocialGovException {
+		return consultar(protocolo, servico);
+	}
+
+	private RetornoProcessamento consultar(String protocolo, ComunicacaoServico servico)
+			throws ComunicacaoEsocialGovException {
 		String xmlRetorno = isNotBlank(urlServicoConsultaProcessamento) ? 
 								servicoConsultaRemoto(protocolo) : 
-								servicoConsultaLocal(protocolo);
+								servicoConsultaLocal(protocolo, servico);
 		return new RetornoProcessamento(xmlRetorno);
 	}
 	
+	/** Com empresas cadastradas, testa com o certificado de cada uma até uma conectar; sem nenhuma, usa o certificado global. */
 	public boolean testarConexaoEsocial() {
+		boolean temEmpresaComCertificado = false;
+		for (EmpresaDTO empresa : empresaServico.listar(null, true)) {
+			try {
+				comunicacaoRegistry.obter(empresa.getId());
+			} catch (EmpresaException e) {
+				continue;
+			}
+			temEmpresaComCertificado = true;
+			if (testarConexao(() -> consultarLoteEventos("0000", empresa.getId()))) {
+				return true;
+			}
+		}
+		return !temEmpresaComCertificado && testarConexao(() -> consultarLoteEventos("0000"));
+	}
+
+	private interface Consulta {
+		RetornoProcessamento executar() throws ComunicacaoEsocialGovException;
+	}
+
+	private boolean testarConexao(Consulta consulta) {
 		boolean conexaoOk = true;
 		try {
-			RetornoProcessamento retornoProcessamento = consultarLoteEventos("0000");
+			RetornoProcessamento retornoProcessamento = consulta.executar();
 			String resposta = retornoProcessamento.getXmlRetorno();
 			if (resposta.indexOf("retornoProcessamentoLoteEventos") <= -1) {
 				LOGGER.debug("Ocorreu um erro ao tentar conectar com o eSocial. RetornoEnvio: {}", resposta);
@@ -74,7 +131,7 @@ public class ComunicacaoEsocialGov {
 		}
 	}
 	
-	private String servicoEnvioLocal(String lote) throws ComunicacaoEsocialGovException {
+	private String servicoEnvioLocal(String lote, ComunicacaoServico servico) throws ComunicacaoEsocialGovException {
 		try {
 			return servico.enviarLote(lote);
 		} catch (IOException | XmlMappingException | SoapFaultClientException e) {
@@ -106,7 +163,7 @@ public class ComunicacaoEsocialGov {
 		}
 	}
 	
-	private String servicoConsultaLocal(String protocolo) throws ComunicacaoEsocialGovException {
+	private String servicoConsultaLocal(String protocolo, ComunicacaoServico servico) throws ComunicacaoEsocialGovException {
 		try {
 			return servico.consultarLote(protocolo);
 		} catch (IOException | SoapFaultClientException e) {

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import br.jus.tst.esocialjt.TipoAmbiente;
 import br.jus.tst.esocialjt.dominio.Evento;
 import br.jus.tst.esocialjt.dominio.Ocorrencia;
+import br.jus.tst.esocialjt.empresa.Empresa;
 import br.jus.tst.esocialjt.negocio.exception.GeracaoXmlException;
 import br.jus.tst.esocialjt.negocio.exception.ValidacaoXMLException;
 import br.jus.tst.esocialjt.xml.ValidadorXml;
@@ -48,17 +49,32 @@ public abstract class GeradorXml {
 	private ValidadorXml validadorXml;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeradorXml.class);
+
+	// preencherConstantes() é chamado pelas subclasses sem acesso ao evento
+	private static final ThreadLocal<TipoAmbiente> AMBIENTE_DO_EVENTO = new ThreadLocal<>();
 	
 	public String gerarXml(Evento evento) throws GeracaoXmlException {
-		Object objetoEsocial = criarObjetoESocial(evento);
+		Empresa empresa = evento.getOcorrencia().getEmpresa();
+		AMBIENTE_DO_EVENTO.set(ambienteDe(empresa));
 		try {
+			Object objetoEsocial = criarObjetoESocial(evento);
 			String xml = marshal(objetoEsocial);
-			String xmlAssinado = assinadorXml.assinar(xml);
+			// empresa nula só ocorre fora do fluxo normal (coluna NOT NULL); cai no certificado global legado
+			String xmlAssinado = empresa == null ? assinadorXml.assinar(xml) : assinadorXml.assinar(xml, empresa.getId());
 			validadorXml.validar(xmlAssinado, getArquivoXSD());
 			return xmlAssinado;
 		} catch (JAXBException | ValidacaoXMLException e) {
 			throw new GeracaoXmlException(evento, "Não foi possível gerar o XML - " + e.getMessage(), e);
-		} 
+		} finally {
+			AMBIENTE_DO_EVENTO.remove();
+		}
+	}
+
+	private TipoAmbiente ambienteDe(Empresa empresa) {
+		if (empresa != null && empresa.getAmbiente() != null) {
+			return TipoAmbiente.valueOf(empresa.getAmbiente());
+		}
+		return AMBIENTE;
 	}
 
 	private String marshal(Object instance) throws JAXBException {
@@ -75,7 +91,8 @@ public abstract class GeradorXml {
 	
 	protected <T extends Object> T preencherConstantes(T ideEvento) {
 		try {
-			new Statement(ideEvento, "setTpAmb", new Object[]{AMBIENTE.codigo()}).execute();
+			TipoAmbiente ambiente = AMBIENTE_DO_EVENTO.get() != null ? AMBIENTE_DO_EVENTO.get() : AMBIENTE;
+			new Statement(ideEvento, "setTpAmb", new Object[]{ambiente.codigo()}).execute();
 			new Statement(ideEvento, "setProcEmi", new Object[]{APLICATIVO_DO_EMPREGADOR}).execute();
 			new Statement(ideEvento, "setVerProc", new Object[]{buildProperties.getVersion()}).execute();
 		} catch (Exception e) {

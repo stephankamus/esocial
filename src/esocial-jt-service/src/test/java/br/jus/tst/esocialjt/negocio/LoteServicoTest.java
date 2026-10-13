@@ -18,6 +18,10 @@ import com.github.database.rider.spring.api.DBRider;
 
 import br.jus.tst.esocialjt.dominio.EnvioEvento;
 import br.jus.tst.esocialjt.dominio.Estado;
+import br.jus.tst.esocialjt.dominio.Evento;
+import br.jus.tst.esocialjt.dominio.Ocorrencia;
+import br.jus.tst.esocialjt.empresa.Empresa;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 import br.jus.tst.esocialjt.dominio.Lote;
 
 @RunWith(SpringRunner.class)
@@ -85,9 +89,30 @@ public class LoteServicoTest {
 	}
 
 	private List<EnvioEvento> gerarEnvioEvento(int quantidade) {
+		return gerarEnvioEvento(quantidade, EmpresaTeste.empresa());
+	}
+
+	@Test
+	@DataSet(executeScriptsBefore = "cleanup.sql")
+	public void deveSepararLotesPorEmpresa() {
+		List<EnvioEvento> envios = gerarEnvioEvento(2, EmpresaTeste.empresa());
+		envios.addAll(gerarEnvioEvento(2, EmpresaTeste.outraEmpresa()));
+
+		List<Lote> lotes = loteServico.gerarLotes(envios);
+
+		assertThat(lotes).hasSize(2);
+		assertThat(lotes).extracting(l -> l.getEmpresa().getId()).containsExactlyInAnyOrder(1L, 2L);
+		assertThat(lotes).allSatisfy(l -> assertThat(l.getEnviosEvento()).hasSize(2));
+	}
+
+	private List<EnvioEvento> gerarEnvioEvento(int quantidade, Empresa empresa) {
 		ArrayList<EnvioEvento> listaEnvioEvento = new ArrayList<EnvioEvento>();
 		for (int i = 0; i < quantidade; i++) {
-			listaEnvioEvento.add(new EnvioEvento());
+			EnvioEvento envio = new EnvioEvento();
+			Evento evento = new Evento();
+			evento.setOcorrencia(new Ocorrencia().setEmpresa(empresa));
+			envio.setEvento(evento);
+			listaEnvioEvento.add(envio);
 		}
 		return listaEnvioEvento;
 	}

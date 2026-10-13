@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import br.jus.tst.esocial.ocorrencia.OcorrenciaDTO;
 import br.jus.tst.esocial.ocorrencia.TipoOcorrencia;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -32,6 +33,7 @@ public class OcorrenciaResourceTest {
 	public void init() throws Exception {
 		ExemploOcorrenciaServico servico = new ExemploOcorrenciaServico();
 		ocorrenciaDTO = servico.lerOcorrenciaDTO(TipoOcorrencia.INFORMACOES_EMPREGADOR);
+		ocorrenciaDTO.setCodEmpresa(EmpresaTeste.ID);
 		ocorrenciaDTO.setDataOcorrencia(
 				new Date(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 	}

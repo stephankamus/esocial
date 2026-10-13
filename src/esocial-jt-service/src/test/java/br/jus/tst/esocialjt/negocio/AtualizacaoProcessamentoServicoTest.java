@@ -103,7 +103,7 @@ public class AtualizacaoProcessamentoServicoTest {
 	public void deveManterEstadoSeErroComunicacao() throws ComunicacaoEsocialGovException {
 		Lote lote = em.find(Lote.class, 3l);
 
-		Mockito.when(comunicacaoEsocialGov.consultarLoteEventos(Mockito.anyString()))
+		Mockito.when(comunicacaoEsocialGov.consultarLoteEventos(Mockito.anyString(), Mockito.anyLong()))
 				.thenThrow(new ComunicacaoEsocialGovException("Erro de comunicação"));
 
 		atualizacaoProcessamentoServico.atualizarProcessamentoLote(Arrays.asList(lote));
@@ -128,6 +128,6 @@ public class AtualizacaoProcessamentoServicoTest {
 	}
 
 	private void setRespostaEsperada(RetornoProcessamento retornoProcessamento) throws ComunicacaoEsocialGovException {
-		Mockito.when(comunicacaoEsocialGov.consultarLoteEventos(Mockito.anyString())).thenReturn(retornoProcessamento);
+		Mockito.when(comunicacaoEsocialGov.consultarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(retornoProcessamento);
 	}
 }

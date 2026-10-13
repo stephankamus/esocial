@@ -8,6 +8,7 @@ import javax.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,8 @@ import br.jus.tst.esocialjt.dominio.Evento;
 import br.jus.tst.esocialjt.dominio.Lote;
 import br.jus.tst.esocialjt.dominio.Ocorrencia;
 import br.jus.tst.esocialjt.dominio.TipoEvento;
+import br.jus.tst.esocialjt.empresa.Empresa;
+import br.jus.tst.esocialjt.empresa.EmpresaServico;
 import br.jus.tst.esocialjt.negocio.EnvioServico;
 import br.jus.tst.esocialjt.negocio.EventoServico;
 import br.jus.tst.esocialjt.negocio.TipoEventoServico;
@@ -43,10 +46,18 @@ public class ProducaoRestritaServico {
 	@Autowired
 	private EntityManager em;
 
+	@Autowired
+	private EmpresaServico empresaServico;
+
+	@Value("${esocialjt.ambiente}")
+	private TipoAmbiente ambientePadrao;
+
 	public Evento limparProducaoRestrita(String cnpj, TipoAmbiente ambiente) {
 		verificarAmbiente(ambiente);
+		Empresa empresa = empresaServico.obterPorCnpj(cnpj);
+		verificarAmbientesDasEmpresas();
 
-		Evento evento = gerarEventoLimparProducaoRestrita(cnpj);
+		Evento evento = gerarEventoLimparProducaoRestrita(cnpj, empresa);
 		List<EnvioEvento> enviosEvento = envioServico.enviarEventosParaESocialGov(Arrays.asList(evento));
 		verificarResposta(enviosEvento);
 		apagarRegistrosLocais(ambiente);
@@ -54,11 +65,12 @@ public class ProducaoRestritaServico {
 		return enviosEvento.get(0).getEvento();
 	}
 
-	protected Evento gerarEventoLimparProducaoRestrita(String cnpj) {
+	protected Evento gerarEventoLimparProducaoRestrita(String cnpj, Empresa empresa) {
 		InformacoesEmpregador dados = modelo.obterDadosLimparProducaoRestrita(cnpj);
 
 		Ocorrencia ocorrencia = new Ocorrencia();
 		ocorrencia
+			.setEmpresa(empresa)
 			.setTipoOcorrencia(TipoOcorrencia.INFORMACOES_EMPREGADOR)
 			.setDadosOcorrencia(dados)
 			.setOperacao(Operacao.INCLUSAO)
@@ -68,6 +80,15 @@ public class ProducaoRestritaServico {
 		Evento evento = eventoServico.gerarEvento(ocorrencia, tipoEvento);
 		
 		return evento;
+	}
+
+	/** A limpeza local apaga os dados de todas as empresas; recusa se alguma estiver em produção. */
+	protected void verificarAmbientesDasEmpresas() {
+		boolean temProducao = empresaServico.listar(null, false).stream()
+				.anyMatch(e -> TipoAmbiente.PRODUCAO.name().equals(e.getAmbiente() != null ? e.getAmbiente() : ambientePadrao.name()));
+		if (temProducao) {
+			throw new ProducaoRestritaException("Há empresa(s) em PRODUÇÃO; a limpeza local apagaria os dados delas.");
+		}
 	}
 
 	protected void verificarAmbiente(TipoAmbiente ambiente) {

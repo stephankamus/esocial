@@ -2,6 +2,8 @@ package br.jus.tst.esocialjt.verificacao;
 
 import br.jus.tst.esocial.ocorrencia.TipoOcorrencia;
 import br.jus.tst.esocialjt.dominio.Ocorrencia;
+import br.jus.tst.esocialjt.empresa.Empresa;
+import br.jus.tst.esocialjt.empresa.EmpresaServico;
 import br.jus.tst.esocialjt.negocio.exception.EntidadeNaoExisteException;
 import br.jus.tst.esocialjt.ocorrencia.ExemploOcorrenciaServico;
 import br.jus.tst.esocialjt.ocorrencia.OcorrenciaServico;
@@ -18,6 +20,9 @@ public class VerificacaoServico {
     @Autowired
     OcorrenciaServico servico;
 
+    @Autowired
+    EmpresaServico empresaServico;
+
     final List<TipoOcorrencia> verificacoes = Arrays.asList(
             TipoOcorrencia.INFORMACOES_EMPREGADOR,
             TipoOcorrencia.TABELA_ESTABELECIMENTO,
@@ -26,14 +31,16 @@ public class VerificacaoServico {
             TipoOcorrencia.TABELA_PROCESSO
     );
 
-    public void iniciarEnvioEventosExemplo() {
+    public void iniciarEnvioEventosExemplo(Long codEmpresa) {
         System.out.println("Iniciando envio de eventos de exemplo");
+        Empresa empresa = empresaServico.obterAtiva(codEmpresa);
         ExemploOcorrenciaServico exemplo = new ExemploOcorrenciaServico();
 
         verificacoes.forEach(tipo -> {
             try {
                 Ocorrencia ocorrencia = exemplo.lerOcorrencia(tipo);
-                servico.salvar(ocorrencia);
+                ocorrencia.getDadosOcorrencia().getIdeEmpregador().setNrInsc(empresa.getCnpj());
+                servico.salvar(ocorrencia, codEmpresa);
             } catch (EntidadeNaoExisteException | IOException e) {
                 e.printStackTrace();
             }

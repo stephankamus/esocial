@@ -26,6 +26,8 @@ import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.jus.tst.esocialjt.empresa.Empresa;
+
 /**
  * The persistent class for the EST_LOTE database table.
  * 
@@ -78,6 +80,18 @@ public class Lote implements Serializable {
 	@OneToMany(mappedBy = "lote", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<EnvioEvento> enviosEvento = new ArrayList<>();
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "COD_EMPRESA", nullable = false)
+	private Empresa empresa;
+
+	public Empresa getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Empresa empresa) {
+		this.empresa = empresa;
+	}
 
 	public CodigoResposta getCodigoResposta() {
 		return codigoResposta;

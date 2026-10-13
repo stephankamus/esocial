@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import br.jus.tst.esocialjt.empresa.CertificadoRegistry;
 import br.jus.tst.esocialjt.infraestrutura.Http;
 
 @Component
@@ -22,6 +23,17 @@ public class AssinadorXml {
 	
 	@Autowired
 	AssinaturaXmlServico servico;
+
+	@Autowired
+	CertificadoRegistry certificadoRegistry;
+
+	/** Assina com o certificado ativo da empresa; com serviço remoto configurado, ele usa o próprio certificado. */
+	public String assinar(String xml, Long codEmpresa) {
+		if (isNotBlank(urlServicoAssinatura)) {
+			return assinarRemoto(xml, null);
+		}
+		return servico.assinar(xml, certificadoRegistry.obter(codEmpresa));
+	}
 
 	public String assinar(String xml) {
 		String signedXML = null;

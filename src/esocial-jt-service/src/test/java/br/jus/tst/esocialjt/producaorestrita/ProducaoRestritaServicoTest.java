@@ -18,6 +18,7 @@ import com.github.database.rider.spring.api.DBRider;
 import br.jus.tst.esocialjt.TipoAmbiente;
 import br.jus.tst.esocialjt.dominio.Evento;
 import br.jus.tst.esocialjt.dominio.TipoEvento;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -36,7 +37,7 @@ public class ProducaoRestritaServicoTest {
 	@Test
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveGerarEventoParaLimparProducaoRestrita() {
-		Evento evento = producaoRestritaServico.gerarEventoLimparProducaoRestrita(CNPJ);
+		Evento evento = producaoRestritaServico.gerarEventoLimparProducaoRestrita(CNPJ, EmpresaTeste.empresa());
 
 		SoftAssertions soft = new SoftAssertions();
 		soft.assertThat(evento.getIdEvento()).isNotNull();

@@ -8,6 +8,8 @@ import br.jus.tst.esocial.ocorrencia.Operacao;
 import br.jus.tst.esocial.ocorrencia.TipoOcorrencia;
 import br.jus.tst.esocial.ocorrencia.dados.TabelaLotacao;
 import br.jus.tst.esocialjt.dominio.Ocorrencia;
+import br.jus.tst.esocialjt.empresa.EmpresaException;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.spring.api.DBRider;
 import org.assertj.core.api.SoftAssertions;
@@ -50,6 +52,18 @@ public class OcorrenciaServicoTest{
 
 	}
 	
+	@Test(expected = EmpresaException.class)
+	@DataSet(executeScriptsBefore = "cleanup.sql")
+	public void deveRejeitarOcorrenciaSemEmpresa() {
+		servico.salvar(getOcorrencia().setEmpresa(null));
+	}
+
+	@Test(expected = EmpresaException.class)
+	@DataSet(executeScriptsBefore = "cleanup.sql")
+	public void deveRejeitarEmpregadorDeOutraEmpresa() {
+		servico.salvar(getOcorrencia(), 2L);
+	}
+
 	@Test
 	@DataSet(value = {"ocorrencia.yml"}, executeScriptsBefore = "cleanup.sql" ) 
 	public void deveRecuperarTodasOcorrencias(){
@@ -109,6 +123,7 @@ public class OcorrenciaServicoTest{
 	private Ocorrencia getOcorrencia() {
 		Ocorrencia ocorrencia = new Ocorrencia();
 		ocorrencia.setTipoOcorrencia(TipoOcorrencia.TABELA_LOTACAO).setReferencia("10000").setOperacao(Operacao.INCLUSAO)
+				.setEmpresa(EmpresaTeste.empresa())
 				.setDataOcorrencia(new Date()).setDadosOcorrencia(getTabelaLotacao());
 		return ocorrencia;
 	}

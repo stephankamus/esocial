@@ -19,6 +19,7 @@ public class ExclusaoServico {
         Ocorrencia exclusao = new Ocorrencia();
 
         exclusao.setTipoOcorrencia(TipoOcorrencia.EXCLUSAO);
+        exclusao.setEmpresa(ocorrencia.getEmpresa());
         exclusao.setReferencia(ocorrencia.getReferencia());
         exclusao.setDataOcorrencia(new Date());
 

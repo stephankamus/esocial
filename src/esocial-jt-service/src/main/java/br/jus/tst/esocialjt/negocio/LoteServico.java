@@ -2,6 +2,7 @@ package br.jus.tst.esocialjt.negocio;
 
 import br.jus.tst.esocialjt.dominio.EnvioEvento;
 import br.jus.tst.esocialjt.dominio.Lote;
+import br.jus.tst.esocialjt.empresa.Empresa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -43,24 +46,25 @@ public class LoteServico {
 
 	public List<Lote> gerarLotes(List<EnvioEvento> enviosEvento) {
 		ArrayList<Lote> listaLotes = new ArrayList<>();
-		Lote lote;
-		if (!enviosEvento.isEmpty()) {
-			lote = novoLote();
-			listaLotes.add(lote);
-			for (EnvioEvento envioEvento : enviosEvento) {
-				if (lote.getEnviosEvento().size() >= LIMITE_EVENTOS_LOTE) {
-					lote = novoLote();
-					listaLotes.add(lote);
-				}
-				lote.adicionarEnvioEvento(envioEvento);
-				envioEvento.setLote(lote);
+		// um lote só pode ter eventos de uma empresa (mesmo certificado e empregador)
+		Map<Long, Lote> loteAtualPorEmpresa = new HashMap<>();
+		for (EnvioEvento envioEvento : enviosEvento) {
+			Empresa empresa = envioEvento.getEvento().getOcorrencia().getEmpresa();
+			Lote lote = loteAtualPorEmpresa.get(empresa.getId());
+			if (lote == null || lote.getEnviosEvento().size() >= LIMITE_EVENTOS_LOTE) {
+				lote = novoLote(empresa);
+				loteAtualPorEmpresa.put(empresa.getId(), lote);
+				listaLotes.add(lote);
 			}
+			lote.adicionarEnvioEvento(envioEvento);
+			envioEvento.setLote(lote);
 		}
 		return listaLotes;
 	}
 
-	private Lote novoLote() {
+	private Lote novoLote(Empresa empresa) {
 		Lote lote = new Lote();
+		lote.setEmpresa(empresa);
 		estadoServico.atualizarEstado(lote);
 		return atualiza(lote);
 	}

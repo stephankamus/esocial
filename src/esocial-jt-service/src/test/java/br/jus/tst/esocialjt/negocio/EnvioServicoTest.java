@@ -4,6 +4,7 @@ import br.jus.tst.esocial.ocorrencia.TipoOcorrencia;
 import br.jus.tst.esocialjt.comunicacaogov.ComunicacaoEsocialGov;
 import br.jus.tst.esocialjt.comunicacaogov.RetornoEnvio;
 import br.jus.tst.esocialjt.dominio.*;
+import br.jus.tst.esocialjt.empresa.EmpresaTeste;
 import br.jus.tst.esocialjt.negocio.exception.ComunicacaoEsocialGovException;
 import br.jus.tst.esocialjt.ocorrencia.ExemploOcorrenciaServico;
 import com.github.database.rider.core.api.dataset.DataSet;
@@ -53,7 +54,7 @@ public class EnvioServicoTest {
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveEnviarComSucesso() throws ComunicacaoEsocialGovException {
 		
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		Evento evento = getEvento();
 
@@ -81,7 +82,7 @@ public class EnvioServicoTest {
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveEnviarDuasVezes() throws ComunicacaoEsocialGovException {
 
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		Evento evento = getEvento();
 		em.persist(evento);
@@ -111,7 +112,7 @@ public class EnvioServicoTest {
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveSalvarUmEventoDoisEnviosDoisLotes() throws ComunicacaoEsocialGovException {
 
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		Evento evento = getEvento();
 		envioServico.enviarEventosParaESocialGov(Collections.singletonList(evento)).get(0);
@@ -134,7 +135,7 @@ public class EnvioServicoTest {
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveSalvarUmEventoGerenciadoDoisEnviosDoisLotes() throws ComunicacaoEsocialGovException {
 
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		Evento evento = getEvento();
 		evento = em.merge(evento);
@@ -158,7 +159,7 @@ public class EnvioServicoTest {
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveSalvarDoisEventosDoisEnviosUmLote() throws ComunicacaoEsocialGovException {
 		
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		envioServico.enviarEventosParaESocialGov(Arrays.asList(getEvento(), getEvento()))
 				.stream()
@@ -181,7 +182,7 @@ public class EnvioServicoTest {
 	@Test
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveEnviarDoisEventoComSucesso() throws ComunicacaoEsocialGovException {
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		List<Evento> resultado = envioServico
 				.enviarEventosParaESocialGov(Arrays.asList(getEvento(), getEvento()))
@@ -205,7 +206,7 @@ public class EnvioServicoTest {
 	@Test
 	@DataSet(executeScriptsBefore = "cleanup.sql")
 	public void deveEnviarUmEventoComSucessoOutroComErro() throws ComunicacaoEsocialGovException {
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenReturn(getRetorno());
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenReturn(getRetorno());
 
 		Evento eventoA = getEvento();
 		Evento eventoB = getEvento();
@@ -241,7 +242,7 @@ public class EnvioServicoTest {
 
 		String mensagem = "Erro de comunicacao";
 
-		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString())).thenThrow(new ComunicacaoEsocialGovException(mensagem));
+		Mockito.when(comunicacaoEsocialGov.enviarLoteEventos(Mockito.anyString(), Mockito.anyLong())).thenThrow(new ComunicacaoEsocialGovException(mensagem));
 
 		Evento evento = getEvento();
 
@@ -271,6 +272,7 @@ public class EnvioServicoTest {
 		
 		try {
 			ocorrencia = servico.lerOcorrencia(TipoOcorrencia.INFORMACOES_EMPREGADOR);
+			ocorrencia.setEmpresa(EmpresaTeste.empresa());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
