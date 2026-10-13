@@ -73,6 +73,21 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
             @Param("periodosApuracao") List<String> periodosApuracao
     );
 
+    @Query("SELECT o.id FROM Ocorrencia o WHERE o.empresa.id = :codEmpresa AND " +
+            "(:#{#estados.isEmpty()} = true OR o.evento.estado IN :estados) AND " +
+            "(:#{#tipos.isEmpty()} = true OR o.evento.tipoEvento IN :tipos) AND " +
+            "(:#{#cpfs.isEmpty()} = true OR o.cpf IN :cpfs) AND " +
+            "(:#{#periodosApuracao.isEmpty()} = true OR o.periodoApuracao IN :periodosApuracao) AND " +
+            "o.ocorrenciaExclusaoId IS NULL AND " +
+            "o.ocorrenciaRetificacaoId IS NULL")
+    List<Long> buscarIdsPorFiltrosDaEmpresa(
+            @Param("codEmpresa") Long codEmpresa,
+            @Param("estados") List<Estado> estados,
+            @Param("tipos") List<TipoEvento> tipos,
+            @Param("cpfs") List<String> cpfs,
+            @Param("periodosApuracao") List<String> periodosApuracao
+    );
+
     @Query("SELECT o.id FROM Ocorrencia o WHERE o.evento.estado = :estado AND o.evento.tipoEvento IN :tipos AND o.periodoApuracao IS NULL")
     List<Long> findIdsParaUpgradePeriodoApuracao(
             @Param("estado") Estado estado,

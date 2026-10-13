@@ -8,6 +8,15 @@ public class BuscaIdsFiltroDTO {
 	private List<Long> tipos;
 	private List<String> cpf;
 	private List<String> periodoApuracao;
+	private Long codEmpresa;
+
+	public Long getCodEmpresa() {
+		return codEmpresa;
+	}
+
+	public void setCodEmpresa(Long codEmpresa) {
+		this.codEmpresa = codEmpresa;
+	}
 
 	public List<Long> getEstados() {
 		return estados;

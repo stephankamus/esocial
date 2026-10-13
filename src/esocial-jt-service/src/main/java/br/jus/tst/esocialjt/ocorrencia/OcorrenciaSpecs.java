@@ -18,6 +18,10 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 @Component
 public class OcorrenciaSpecs {
 	
+	public Specification<Ocorrencia> daEmpresa(Long codEmpresa) {
+		return (root, query, cb) -> codEmpresa == null ? cb.and() : cb.equal(root.get("empresa").get("id"), codEmpresa);
+	}
+
 	public Specification<Ocorrencia> nosEstados(List<Estado> estados) {
 		return (root, query, cb) -> isEmpty(estados) ? cb.and() : root.get("evento").get("estado").in(estados);
 	}

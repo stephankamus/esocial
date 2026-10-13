@@ -105,11 +105,19 @@ public class OcorrenciaServico {
 	
 	public OcorrenciaPage recuperaPaginado(int page, int size, List<Estado> estados, String expressao, List<TipoEvento> tipos,
 			boolean incluirArquivados, List<String> cpf, List<String> periodoApuracao, LocalDate dataInicio, LocalDate dataFim) {
+		return recuperaPaginado(page, size, estados, expressao, tipos, incluirArquivados, cpf, periodoApuracao, dataInicio, dataFim, null);
+	}
+
+	/** codEmpresa nulo = todas as empresas. */
+	public OcorrenciaPage recuperaPaginado(int page, int size, List<Estado> estados, String expressao, List<TipoEvento> tipos,
+			boolean incluirArquivados, List<String> cpf, List<String> periodoApuracao, LocalDate dataInicio, LocalDate dataFim,
+			Long codEmpresa) {
 		Sort ordenamento = Sort.by("dataRecebimento").descending();
 		PageRequest pageRequest = PageRequest.of(page, size, ordenamento);
 		
 		Page<Ocorrencia> pagina = repository.findAll(
-					specs.nosEstados(estados)
+					specs.daEmpresa(codEmpresa)
+					.and(specs.nosEstados(estados))
 					.and(specs.comExpressao(expressao))
 					.and(specs.dosTipos(tipos))
 					.and(specs.incluirArquivados(incluirArquivados)
@@ -125,7 +133,8 @@ public class OcorrenciaServico {
 											.stream()
 											.map(e -> {
 												long count = repository.count(
-														specs.nosEstados(Collections.singletonList(e))
+														specs.daEmpresa(codEmpresa)
+										.and(specs.nosEstados(Collections.singletonList(e)))
 														.and(specs.comExpressao(expressao))
 														.and(specs.dosTipos(tipos))
 														.and(specs.incluirArquivados(incluirArquivados))
@@ -221,6 +230,12 @@ public class OcorrenciaServico {
 	}
 
 	public List<Long> buscarIdsPorFiltros(List<Estado> estados, List<TipoEvento> tipos, List<String> cpf, List<String> periodoApuracao) {
+		return buscarIdsPorFiltros(estados, tipos, cpf, periodoApuracao, null);
+	}
+
+	/** codEmpresa nulo = todas as empresas. */
+	public List<Long> buscarIdsPorFiltros(List<Estado> estados, List<TipoEvento> tipos, List<String> cpf, List<String> periodoApuracao,
+			Long codEmpresa) {
 		// Remove espaços em branco dos CPFs
 		List<String> cpfsTrimmed = cpf == null ? Collections.emptyList() :
 				cpf.stream()
@@ -233,9 +248,14 @@ public class OcorrenciaServico {
 						.map(String::trim)
 						.collect(Collectors.toList());
 
+		List<Estado> estadosSeguros = estados == null ? Collections.emptyList() : estados;
+		List<TipoEvento> tiposSeguros = tipos == null ? Collections.emptyList() : tipos;
+		if (codEmpresa != null) {
+			return repository.buscarIdsPorFiltrosDaEmpresa(codEmpresa, estadosSeguros, tiposSeguros, cpfsTrimmed, periodosTrimmed);
+		}
 		return repository.buscarIdsPorFiltros(
-				estados == null ? Collections.emptyList() : estados,
-				tipos == null ? Collections.emptyList() : tipos,
+				estadosSeguros,
+				tiposSeguros,
 				cpfsTrimmed,
 				periodosTrimmed
 		);

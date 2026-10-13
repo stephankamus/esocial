@@ -52,9 +52,26 @@ Branch de trabalho: `multiempresa`. `master` deve apenas espelhar o upstream.
    empresa pelo CNPJ e recusa se alguma empresa estiver em PRODUCAO (a limpeza local apaga dados de todas).
    Testes: migration de teste `V1001` cria as empresas 1 (CNPJ 00509968000148) e 2; `EmpresaTeste` as devolve;
    datasets usam `COD_EMPRESA: "1"`. Suíte: 373 testes passando.
+6. Filtro opcional `codEmpresa` em `GET /ocorrencias/paginado` e no corpo de `POST /ocorrencias/busca-ids`
+   (sem ele, todas as empresas). Contrato para o ERP abaixo. Suíte: 375 testes.
+
+## Contrato da API para o ERP (base `/esocial-jt-service`)
+Erros de empresa/certificado: `{"mensagem": "..."}` com 400 (dados inválidos), 404 (não existe), 409 (CNPJ duplicado),
+422 (regra: empresa inativa, sem certificado, CNPJ divergente, certificado vencido).
+- `GET /empresas?busca=<trecho de CNPJ ou razão social>&somenteAtivas=true` -> lista `EmpresaDTO`.
+- `GET /empresas/cnpj/{cnpj}` (14 dígitos) -> `EmpresaDTO` (usar para vincular empresa do ERP -> `id` do eSocial).
+- `POST /empresas` / `PUT /empresas/{id}`: `{cnpj, razaoSocial, tpInsc?, tpInscTransmissor?, nrInscTransmissor?,
+  ambiente? (PRODUCAO|PRODUCAO_RESTRITA), ativo?}`. CNPJ não muda depois de criado.
+- `POST /empresas/{id}/certificados` multipart (`arquivo` .pfx, `senha`); `GET /empresas/{id}/certificados`;
+  `DELETE /empresas/{id}/certificados/{cod}` (desativa). Nunca retorna arquivo/senha.
+- `POST /ocorrencias`: JSON de sempre + `codEmpresa` (obrigatório). `dadosOcorrencia.ideEmpregador.nrInsc` = CNPJ da
+  empresa (14) ou raiz (8). Mesmo campo no tópico Kafka.
+- `GET /ocorrencias/paginado?...&codEmpresa=`; `POST /ocorrencias/busca-ids` `{..., "codEmpresa": 1}`.
+- A resposta de ocorrência e lote inclui o objeto `empresa`.
+- Ainda sem filtro por empresa: `/ocorrencias/sumario/{tipo}`, `/ocorrencias/tipos`, `/ocorrencias/dados-basicos`
+  (deprecated) e as ações em lote (`arquivar-erros`, `arquivar-excluidos-retificados`, que valem para todas).
 
 ## Pendências (ordem planejada)
-6. Endpoint de busca para o ERP já existe (`GET /empresas?busca=`); documentar contrato final.
 7. Tela de cadastro (empresa + upload de certificado) no frontend React (`frontend/`).
 8. Depois: ajustar backend e frontend do ERP (guardar `codEmpresa` do eSocial por empresa do ERP e enviá-lo
    em todas as chamadas).

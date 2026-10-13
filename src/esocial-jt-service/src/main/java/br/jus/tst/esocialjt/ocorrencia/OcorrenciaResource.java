@@ -72,7 +72,8 @@ public class OcorrenciaResource {
 			@RequestParam(required = false, defaultValue = "") List<String> cpf,
 			@RequestParam(required = false, defaultValue = "") List<String> periodoApuracao,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+			@RequestParam(required = false) Long codEmpresa) {
 		List<Estado> estadosObj = estados
 									.stream()
 									.map(Estado::new)
@@ -83,7 +84,7 @@ public class OcorrenciaResource {
 									.map(TipoEvento::new)
 									.collect(Collectors.toList());
 		
-		return ocorrenciaServico.recuperaPaginado(page, size, estadosObj, expressao, tiposObj, incluirArquivados, cpf, periodoApuracao, dataInicio, dataFim);
+		return ocorrenciaServico.recuperaPaginado(page, size, estadosObj, expressao, tiposObj, incluirArquivados, cpf, periodoApuracao, dataInicio, dataFim, codEmpresa);
 	}
 	
 	@Operation(summary = "Consulta os tipos já enviados para o esocial.")
@@ -174,7 +175,8 @@ public class OcorrenciaResource {
 				estadosObj,
 				tiposObj,
 				filtros.getCpf(),
-				filtros.getPeriodoApuracao()
+				filtros.getPeriodoApuracao(),
+				filtros.getCodEmpresa()
 		);
 	}
 

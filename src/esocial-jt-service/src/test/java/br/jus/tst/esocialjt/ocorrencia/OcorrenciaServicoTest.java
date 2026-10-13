@@ -87,6 +87,30 @@ public class OcorrenciaServicoTest{
 	}
 	
 	@Test
+	@DataSet(value = {"ocorrencia.yml", "evento.yml"}, executeScriptsBefore = "cleanup.sql")
+	public void deveFiltrarPaginadoPorEmpresa() {
+		long daEmpresa1 = paginado(1L);
+		long daEmpresa2 = paginado(2L);
+		long todas = paginado(null);
+
+		assertThat(daEmpresa1).isEqualTo(4);
+		assertThat(daEmpresa2).isEqualTo(0);
+		assertThat(todas).isEqualTo(4);
+	}
+
+	@Test
+	@DataSet(value = {"ocorrencia.yml", "evento.yml"}, executeScriptsBefore = "cleanup.sql")
+	public void deveFiltrarBuscaIdsPorEmpresa() {
+		assertThat(servico.buscarIdsPorFiltros(null, null, null, null, 1L)).isNotEmpty();
+		assertThat(servico.buscarIdsPorFiltros(null, null, null, null, 2L)).isEmpty();
+	}
+
+	private long paginado(Long codEmpresa) {
+		return servico.recuperaPaginado(0, 10, Collections.emptyList(), "", Collections.emptyList(), false,
+				Collections.emptyList(), Collections.emptyList(), null, null, codEmpresa).pagina.getTotalElements();
+	}
+
+	@Test
 	@DataSet(value = {"ocorrencia.yml"}, executeScriptsBefore = "cleanup.sql")
 	public void deveRecuperarTodosDadosBasicosOcorrenciasSemEvento(){
 		List<OcorrenciaDadosBasicosDTO> ocorrencias = servico.recuperaDadosBasicos();
