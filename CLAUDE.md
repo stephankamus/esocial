@@ -71,9 +71,14 @@ Erros de empresa/certificado: `{"mensagem": "..."}` com 400 (dados inválidos), 
 - Ainda sem filtro por empresa: `/ocorrencias/sumario/{tipo}`, `/ocorrencias/tipos`, `/ocorrencias/dados-basicos`
   (deprecated) e as ações em lote (`arquivar-erros`, `arquivar-excluidos-retificados`, que valem para todas).
 
+7. Frontend React: tela `/empresas`, acessível pelo menu, lista/busca empresas, cria/edita/inativa e gerencia upload,
+   ativação e desativação de certificados. Cliente Axios injeta o token Keycloak existente. Testes: 2 de UI passam;
+   build de produção e lint passam. Sem chamada real à API/esocial enquanto o backend não estiver rodando com banco,
+   chave AES e certificado configurados. Teste antigo `App.test.js` termina com log assíncrono de API sem servidor,
+   embora passe.
+
 ## Pendências (ordem planejada)
-7. Tela de cadastro (empresa + upload de certificado) no frontend React (`frontend/`).
-8. Depois: ajustar backend e frontend do ERP (guardar `codEmpresa` do eSocial por empresa do ERP e enviá-lo
+8. Ajustar backend e frontend do ERP (guardar `codEmpresa` do eSocial por empresa do ERP e enviá-lo
    em todas as chamadas).
 - Segurança: rotas `/empresas` usam a mesma role Keycloak do resto; avaliar role própria.
 - `/xml/acoes/assinar` e `/lote/acoes/enviar` ainda usam o certificado global.

@@ -1,5 +1,6 @@
-import { Icon, IconButton, Menu } from "@mui/material";
+import { Icon, IconButton, Menu, MenuItem } from "@mui/material";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { PRODUCAO_RESTRITA } from "../../shared/env";
 import { authRequired } from "../../shared/keycloak";
 import LimparProducaoRestrita from "./LimparProducaoRestrita";
@@ -43,6 +44,9 @@ function HeaderMenu() {
           horizontal: "right"
         }}
       >
+        <MenuItem component={Link} to="/empresas" onClick={handleClose}>
+          Empresas e certificados
+        </MenuItem>
         {isProducaoRestrita && <LimparProducaoRestrita onClose={handleClose} />}
         <Status onClose={handleClose} />
         {authRequired && <Logout />}

@@ -142,3 +142,46 @@ export function useExemploOcorrencia(tipo) {
     enabled: !!tipo
   });
 }
+
+export function useEmpresas(busca = "") {
+  const query = `/empresas?busca=${encodeURIComponent(
+    busca
+  )}&somenteAtivas=false`;
+  return useQuery(query, queryFetcher);
+}
+
+export function useSalvarEmpresa() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ id, ...empresa }) =>
+      id ? api.put(`/empresas/${id}`, empresa) : api.post(`/empresas`, empresa),
+    { onSuccess: () => queryClient.invalidateQueries() }
+  );
+}
+
+export function useCertificadosEmpresa(codEmpresa) {
+  const query = `/empresas/${codEmpresa}/certificados`;
+  return useQuery(query, queryFetcher, { enabled: !!codEmpresa });
+}
+
+export function useEnviarCertificado(codEmpresa) {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ arquivo, senha }) => {
+      const formData = new FormData();
+      formData.append("arquivo", arquivo);
+      formData.append("senha", senha);
+      return api.post(`/empresas/${codEmpresa}/certificados`, formData);
+    },
+    { onSuccess: () => queryClient.invalidateQueries() }
+  );
+}
+
+export function useDesativarCertificado(codEmpresa) {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (codCertificado) =>
+      api.delete(`/empresas/${codEmpresa}/certificados/${codCertificado}`),
+    { onSuccess: () => queryClient.invalidateQueries() }
+  );
+}
