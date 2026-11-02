@@ -76,10 +76,29 @@ Erros de empresa/certificado: `{"mensagem": "..."}` com 400 (dados inválidos), 
    build de produção e lint passam. Sem chamada real à API/esocial enquanto o backend não estiver rodando com banco,
    chave AES e certificado configurados. Teste antigo `App.test.js` termina com log assíncrono de API sem servidor,
    embora passe.
+8. Integração ERP (`AsuTech-Contabilidade-BackEnd` e `-Frontend`): entidade/ViewModel `Empresa.IdEmpresaEsocial`,
+  migration EF `VinculoEmpresaEsocial`; `POST /api/Empresas/{id}/esocial/sincronizar` verifica acesso, busca no eSocial
+  por CNPJ e cria/atualiza nome/CNPJ preservando ambiente e transmissor já configurados. O Angular mostra a ação na
+  edição; primeiro salva os dados atuais no ERP, depois sincroniza e exibe o ID recebido. `EsocialService` exige o
+  vínculo e envia `codEmpresa` no fechamento, pagamento e remuneração. `EsocialTstLabs` adiciona o campo ao JSON e
+  centraliza a integração via HttpClient no backend (sem CORS ou credenciais no browser).
+  Verificação: `dotnet build` passa; Angular `npm run build` passa com avisos de budget existentes. A suíte Angular
+  não inicia por erros preexistentes em `lancamento.service.spec.ts` (`LancamentoServiceService`) e
+  `checkbox.component.spec.ts` (genérico `CheckboxComponent<T>`). Não há projeto de testes .NET na solução. A migration
+  deve ser aplicada antes de usar o novo vínculo; sincronização real depende do serviço eSocial no ar.
 
 ## Pendências (ordem planejada)
-8. Ajustar backend e frontend do ERP (guardar `codEmpresa` do eSocial por empresa do ERP e enviá-lo
-   em todas as chamadas).
+- Cadastro do certificado digital A1 no cadastro/edição da empresa do ERP. Hoje upload e gestão ficam na tela de
+  automações (`CertificadoDigitalEmpresa`, `AutomacoesController`, `automacoes-download-nf`). Reaproveitar o
+  armazenamento e a criptografia existentes, evitando dois cadastros/arquivos independentes: o certificado da empresa
+  deve atender tanto às automações de busca de notas no emissor nacional quanto ao eSocial. Ao salvar/substituir,
+  propagar o `.pfx` e a senha ao endpoint `POST /empresas/{id}/certificados` do eSocial; tratar expiração, desativação,
+  falhas parciais e reenvio seguro sem expor senha no frontend.
+- Integrar as demais funcionalidades eSocial ao ERP, sempre associadas ao `IdEmpresaEsocial`/`codEmpresa`: cadastro
+  inicial do empregador (S-1000), tabelas como estabelecimentos (S-1005) e rubricas (S-1010), funcionários/eventos
+  cadastrais (ex.: S-2200), lotes, consulta de processamento, recibos, erros, retificação e exclusão. Mapear os dados
+  existentes do ERP para os DTOs/esquemas eSocial, acompanhar o ciclo de vida dos eventos e exibir estados e retornos
+  na interface.
 - Segurança: rotas `/empresas` usam a mesma role Keycloak do resto; avaliar role própria.
 - `/xml/acoes/assinar` e `/lote/acoes/enviar` ainda usam o certificado global.
 
